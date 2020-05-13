@@ -1,4 +1,4 @@
-const moment = require('moment');
+const moment = require('./node_modules/moment');
 
 function formatMessage(username, text) {
   return {

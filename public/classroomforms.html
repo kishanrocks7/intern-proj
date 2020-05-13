@@ -96,23 +96,9 @@
                     </div>
                     <div class="joinmeetingformbox">
                         <form action="classroom.html">
-                            <div class="form-group">
-                                <label for="classroomId">Classroom ID</label>
-                                <input class="form-control" type="text" name="classroomId" placeholder="Enter classroom ID.." required>
-                            </div>
-
-
-
-
-
-
-
-
-
-                            <div class="form-group">
+                            <div class="form-control">
                                 <label for="username">Username</label>
                                 <input
-                                    class="form-control"
                                     type="text"
                                     name="username"
                                     id="username"
@@ -120,14 +106,18 @@
                                     required
                                 />
                             </div>
-                            <div class="form-group">
-                                <label for="room">code</label>
-                                    <input type="text" class="form-control" name="room" id="room" placeholder="enter the code"
-            
+                            <div class="form-control">
+                                <label for="room">Room</label>
+                                <select name="room" id="room">
+                                    <option value="JavaScript">JavaScript</option>
+                                    <option value="Python">Python</option>
+                                    <option value="PHP">PHP</option>
+                                    <option value="C#">C#</option>
+                                    <option value="Ruby">Ruby</option>
+                                    <option value="Java">Java</option>
+                                </select>
                             </div>
-                            <br>
-                            <button  style="  background: #418f02;
-                            color: white" type ="submit" class="button button-submit btn-block btn">Join Chat</button>
+                            <button type="submit" class="btn">Join Chat</button>
 
 
 
