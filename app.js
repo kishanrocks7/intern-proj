@@ -28,7 +28,7 @@ const {
 
 
 
-const botName = 'ChatCord Bot';
+const botName = 'see';
 
 
 
