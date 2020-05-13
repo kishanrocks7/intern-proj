@@ -4,10 +4,19 @@ const http = require('http');
 const express=require('express');
 const socketio = require('socket.io');
 const bodyParser=require('body-parser');
-const port=8081;
+const port=8081 || process.env.port;
 const path = require('path');
 const app = express();
 const sessionId = uuid.v4();
+
+const server = http.createServer(app);
+const io = socketio(server);
+
+
+app.get('/',function(req,res){
+  res.sendFile(path.join(__dirname+''));
+});
+app.use(express.static('public'));
 
 const formatMessage = require('./utils/messages');
 const {
@@ -17,8 +26,7 @@ const {
   getRoomUsers
 } = require('./utils/users');
 
-const server = http.createServer(app);
-const io = socketio(server);
+
 
 const botName = 'ChatCord Bot';
 
@@ -35,7 +43,7 @@ io.on('connection', socket => {
     socket.join(user.room);
 
     // Welcome current user
-    socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!'));
+    socket.emit('message', formatMessage(botName, 'Welcome to Red-Chat'));
 
     // Broadcast when a user connects
     socket.broadcast
@@ -91,10 +99,7 @@ app.use(bodyParser.urlencoded({
 
 
 
-app.get('/',function(req,res){
-    res.sendFile(path.join(__dirname+''));
-  });
-  app.use(express.static('public'));
+
 
 
 
@@ -147,6 +152,6 @@ async function runSample(msg,projectId = 'rn-bot-mucfbt') {
   return result.fulfillmentText;
 }
 
-app.listen(port,()=>{
+server.listen(port,()=>{
     console.log("running on the port", port);
 })
