@@ -117,6 +117,8 @@ app.get("/", function(req, res){
     res.render("landing");
 });
 
+
+
 //About route
 app.get("/about", function(req, res){
     res.render("about");
