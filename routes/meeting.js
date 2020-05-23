@@ -31,33 +31,29 @@ var MeetingUser = require("../models/meetinguser");
 
  // Meeting Form Home Page
 router.get("/",ensureAuthenticated, function(req, res){
-    var id = req.user._id;
-    var key = id.toString();
-    var fdcipher = crypto.createDecipher('aes-256-cbc',key);
-    var ldcipher = crypto.createDecipher('aes-256-cbc',key);
-    var fnameDcrypted = fdcipher.update(req.user.fname,'hex','utf8');
-    var lnameDcrypted = ldcipher.update(req.user.lname,'hex','utf8');
-    fnameDcrypted += fdcipher.final('utf8');
-    lnameDcrypted += ldcipher.final('utf8');     
-    name = fnameDcrypted +' '+ lnameDcrypted;
-    fnameDcrypted = null;
-    lnameDcrypted = null;
+    name = req.user.fname+' '+req.user.lname;
     res.render("meeting/meetingforms", {name:name, user: req.user}); 
  });
 
 // meeting Create Form Submission
 router.post("/createmeeting",ensureAuthenticated, function(req, res){
+    // console.log(req.body);
     let errors = [];
     var meetingName = req.body.meetingPurpose.trim();
+    // var meetingId = req.body.meetingId.trim();
     var meetingCode = req.body.meetingCode.trim();
     var code = meetingCode;
     var host = {
         id: req.user._id,
         email: req.user.email
     };
+    // console.log(meetingName+" "+meetingId+" "+meetingCode+" "+host.id+" "+host.email);
     if(!meetingCode || !meetingName){
         errors.push({ msg: 'Please enter all the required fields!!'});
     }
+    // if (meetingId.length < 6) {
+    //     errors.push({ msg: 'Meeting Id must be at least 6 characters' });
+    // }
     if (meetingCode.length < 8) {
         errors.push({ msg: 'Meeting Code must be at least 8 characters'});
     }  
@@ -89,8 +85,8 @@ router.post("/createmeeting",ensureAuthenticated, function(req, res){
                           var smtpTransport = nodemailer.createTransport({
                             service: 'Gmail', 
                             auth: {
-                              user: 'codewithash99@gmail.com',
-                               pass: process.env.GMAILPW
+                              user: 'kratitiwari5034@gmail.com',
+                               pass: 'kishan@123'
                             }
                           });
                           var mailOptions = {
@@ -99,16 +95,17 @@ router.post("/createmeeting",ensureAuthenticated, function(req, res){
                             subject: 'Redpositive Meeting Details',
                             text: 'You are receiving this because you have requested to host a meeting.\n\n' +
                                   'Please share the following details to those whom you want to invite to your meeting.\n\n' +
-                                  'Meeting Id - ' + meetingId + '\n' + 'Meeting Code - ' + code + '\n\n' 
+                                  'Meeting Name - ' + meetingName + '\n' + 'Meeting Id - ' + meetingId + '\n' + 'Meeting Code - ' + code + '\n\n' 
                           };
                           smtpTransport.sendMail(mailOptions, function(err) {
-                            req.flash('success_msg', 'An e-mail has been sent to ' + req.user.email + ' with meeting details.');
+                            console.log('mail sent');
+                            req.flash('success', 'An e-mail has been sent to ' + req.user.email + ' with meeting details.');
                             done(err, 'done');
                           });
                         }
                       ], function(err) {
-                        if (err) return next(err);
-                          req.flash('success_msg','Your Session details for meeting has been sent to your mail !');
+                        if (err) console.log(err);
+                          req.flash('success','Your Session details for meeting is sent to your mail !');
                           res.redirect("/meeting");
                       });  
                 })
@@ -145,9 +142,9 @@ router.post("/joinmeeting",ensureAuthenticated, function(req, res){
                 meetingUser.save();
                 meeting.meetingUsers.push(req.user._id);
                 meeting.save();
-                res.redirect("/meeting/" + meeting._id);
+                res.redirect("/meeting/joinmeeting/" + meeting._id);
             } else {
-                req.flash('error_msg','The meeting code is incorrect!');
+                req.flash('error','The meeting code is wrong');
                 res.render("meeting/meetingforms",{name:name, user: req.user});
             }
         });
@@ -156,10 +153,10 @@ router.post("/joinmeeting",ensureAuthenticated, function(req, res){
 });
 
 
+router.get("/joinmeeting/:id",ensureAuthenticated, (req, res) => {
+    res.render('meeting/meetingroom', {user: req.user});
+})
 
-router.get('/:id', (req, res) => {
-    res.send('Meeting page');
-});
 
 
 

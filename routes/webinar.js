@@ -31,30 +31,23 @@ var WebinarUser = require("../models/webinaruser");
 
  // Webinar Form Home Page
 router.get("/",ensureAuthenticated, function(req, res){
-    var id = req.user._id;
-    var key = id.toString();
-    var fdcipher = crypto.createDecipher('aes-256-cbc',key);
-    var ldcipher = crypto.createDecipher('aes-256-cbc',key);
-    var fnameDcrypted = fdcipher.update(req.user.fname,'hex','utf8');
-    var lnameDcrypted = ldcipher.update(req.user.lname,'hex','utf8');
-    fnameDcrypted += fdcipher.final('utf8');
-    lnameDcrypted += ldcipher.final('utf8');     
-    name = fnameDcrypted +' '+ lnameDcrypted;
-    fnameDcrypted = null;
-    lnameDcrypted = null;
+    name = req.user.fname+' '+req.user.lname;
     res.render("webinar/webinarforms", {name:name, user: req.user}); 
 });
 
 // webinar Create Form Submission
 router.post("/createwebinar",ensureAuthenticated, function(req, res){
+     console.log(req.body);
     let errors = [];
     var webinarName = req.body.webinarPurpose.trim();
+    // var webinarId = req.body.webinarId.trim();
     var webinarCode = req.body.webinarCode.trim();
     var code = webinarCode;
     var host = {
         id: req.user._id,
         email: req.user.email
     };
+    // console.log(webinarName+" "+webinarId+" "+webinarCode+" "+host.id+" "+host.email);
     if(!webinarCode || !webinarName){
         errors.push({ msg: 'Please enter an all the required fields!!'});
     }
@@ -90,8 +83,8 @@ router.post("/createwebinar",ensureAuthenticated, function(req, res){
                           var smtpTransport = nodemailer.createTransport({
                             service: 'Gmail', 
                             auth: {
-                              user: 'codewithash99@gmail.com',
-                               pass: process.env.GMAILPW
+                              user: 'kishanpandey5034@gmail.com',
+                               pass: 'kishan@123'
                             }
                           });
                           var mailOptions = {
@@ -104,13 +97,13 @@ router.post("/createwebinar",ensureAuthenticated, function(req, res){
                           };
                           smtpTransport.sendMail(mailOptions, function(err) {
                             console.log('mail sent');
-                            req.flash('success_msg', 'An e-mail has been sent to ' + req.user.email + ' with webinar details.');
+                            req.flash('success', 'An e-mail has been sent to ' + req.user.email + ' with webinar details.');
                             done(err, 'done');
                           });
                         }
                       ], function(err) {
-                        if (err) return next(err);
-                          req.flash('success_msg','Your Session details for webinar is sent to your mail !');
+                        if (err) console.log(err);
+                          req.flash('success','Your Session details for webinar is sent to your mail !');
                           res.redirect("/webinar");
                       });  
                 })
@@ -122,6 +115,7 @@ router.post("/createwebinar",ensureAuthenticated, function(req, res){
  
 // webinar Join Form Submission
 router.post("/joinwebinar",ensureAuthenticated, function(req, res){
+    // console.log(req.body);
     let errors = [];
     Webinar.findOne({webinarId:req.body.webinarId})
     .then(webinar => {
@@ -145,7 +139,7 @@ router.post("/joinwebinar",ensureAuthenticated, function(req, res){
                 webinarUser.save();
                 webinar.webinarUsers.push(req.user._id);
                 webinar.save();
-                res.redirect("/webinar");
+                res.redirect("/webinar/joinwebinar/" + webinar._id);
             } else {
                 errors.push({ msg: 'Webinar Code is Wrong'});
                 res.render("webinar/webinarforms",{errors,name:name, user: req.user});
@@ -156,11 +150,9 @@ router.post("/joinwebinar",ensureAuthenticated, function(req, res){
 });
 
 
-
-
-
-
-
+router.get("/joinwebinar/:id",ensureAuthenticated, (req, res) => {
+    res.render('webinar/webinarroom', {user: req.user});
+})
 
 
 

@@ -54,20 +54,21 @@
                                 <input class="form-control" type="text" name="classroomPurpose" placeholder="Enter classroom name.." required autocomplete="off">
                             </div>
                             <div class="form-group">
-                                <label for="classroomId">Classroom ID</label>
-                                <input class="form-control" type="text" name="classroomId" placeholder="Enter classroom ID.." required autocomplete="off">
-                            </div>
-                            <div class="form-group">
                                 <label for="classroomCode">Code</label>
                                 <input class="form-control" type="password" name="classroomCode" placeholder="Enter classroom code.." required autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="hostDate">Date</label>
+                                <input class="form-control" type="date" name="hostDate" placeholder="Enter class date.." required autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="hostTime">Time</label>
+                                <input class="form-control" type="time" name="hostTime" placeholder="Enter class time.." required autocomplete="off">
                             </div>
                             <div class="form-group">
                                 <button class="button button-submit btn-block">Create Classroom</button>
                             </div>
                         </form>
-                    </div>
-                    <div class="text-center belowcreateform">
-                        <small id="createdesc">hi</small>
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-6 joinmeetingcolumn">
@@ -77,6 +78,10 @@
                     <div class="joinmeetingformbox">
                         
                         <form action="/classroom/joinclassroom" method="post">
+                            <div class="form-group">
+                                <label for="classroomPurpose">Classroom Name</label>
+                                <input class="form-control" type="text" name="classroomPurpose" placeholder="Enter classroom name.." required autocomplete="off">
+                            </div>
                             <div class="form-group">
                                 <label for="classroomId">Classroom ID</label>
                                 <input class="form-control" type="text" name="classroomId" placeholder="Enter classroom ID.." required autocomplete="off">

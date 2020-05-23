@@ -7,43 +7,6 @@ var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
 var methodOverride = require("method-override");
 var bcrypt = require('bcryptjs');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const dialogflow = require('dialogflow');
-const uuid = require('uuid');
-const http = require('http');
-const sessionId = uuid.v4();
-const path = require('path');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 var flash = require('connect-flash');
 var session = require('express-session');
 var async = require("async");
@@ -55,6 +18,9 @@ var User = require("./models/user");
 var Meeting = require("./models/meeting");
 var MeetingUser = require("./models/meetinguser");
 
+const server = require('http').Server(app);
+// messages will be exchanged using this 
+const io = require('socket.io')(server)
 
 
 // Routes
@@ -63,7 +29,8 @@ var webinarRoutes   = require("./routes/webinar"),
     classroomRoutes= require("./routes/classroom");
     profileRoutes = require("./routes/profile");
 
-mongoose.connect("mongodb://localhost:27017/v4", {useNewUrlParser:true,useUnifiedTopology: true,useFindAndModify:false,useCreateIndex: true })
+
+mongoose.connect("//mongodb://localhost:27017/v1", {useNewUrlParser:true,useUnifiedTopology: true,useFindAndModify:false,useCreateIndex: true})
     .then(()=>console.log('MongoDB Connected....'))
     .catch(err => console.log(err));
 app.use(bodyparser.urlencoded({extended: true}));
@@ -98,6 +65,51 @@ app.use((req,res,next)=>{
 //ensure Authentication
 var {ensureAuthenticated} = require('./middleware/auth');
 
+// ========================================================================
+
+
+io.on('connection', socket => {
+  console.log('A user has joined');
+
+
+  // event is emitted from the frontend and received here using .on
+  socket.on('create or join', room => {
+      console.log('create or join to room', room);
+      const myRoom = io.sockets.adapter.rooms[room] || {length: 0}
+      const numClients = myRoom.length
+      console.log((numClients+1) + ' users in the ' + room + ' room');
+
+      if(numClients == 0 ){
+          socket.join(room)
+          socket.emit('created', room);
+      } else if(numClients == 1) {
+          socket.join(room)
+          socket.emit('joined', room);
+      } else {
+          socket.emit('full', room);
+      }
+  })
+
+
+  socket.on('ready', room => {
+      socket.broadcast.to(room).emit('ready')
+  })
+
+  socket.on('candidate', event => {
+      socket.broadcast.to(event.room).emit('candidate', event)
+  })
+
+  socket.on('offer', event => {
+      socket.broadcast.to(event.room).emit('offer', event.sdp)
+  })
+
+  socket.on('answer', event => {
+      socket.broadcast.to(event.room).emit('answer', event.sdp)
+  })
+})
+
+
+// ========================================================================
 
 
 //root route
@@ -120,171 +132,59 @@ app.get("/register", function(req, res){
     res.render("register", {page: 'register'}); 
  });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- app.post('/send-msg',(req,res)=>{
-  runSample(req.body.MSG).then(data=>{
-      res.send({Reply:data})
-  })
-})
-
-/**
-* Send a query to the dialogflow agent, and return the query result.
-* @param {string} projectId The project to be used
-*/
-async function runSample(msg,projectId = 'rn-bot-mucfbt') {
-// A unique identifier for the given session
-
-
-
-// Create a new session
-const sessionClient = new dialogflow.SessionsClient({
-    keyFilename:"C:/Users/kishan/Desktop/check1/intern-proj-0e3d8503b13d9b6779c10f5bb990f8fd435a78d5/RN-bot-a4afe1559c55.json"
-});
-const sessionPath = sessionClient.sessionPath(projectId, sessionId);
-
-// The text query request.
-const request = {
-  session: sessionPath,
-  queryInput: {
-    text: {
-      // The query to send to the dialogflow agent
-      text: msg,
-      // The language used by the client (en-US)
-      languageCode: 'en-US',
-    },
-  },
-};
-
-// Send request and log result
-const responses = await sessionClient.detectIntent(request);
-console.log('Detected intent');
-const result = responses[0].queryResult;
-console.log(`  Query: ${result.queryText}`);
-console.log(`  Response: ${result.fulfillmentText}`);
-if (result.intent) {
-  console.log(`  Intent: ${result.intent.displayName}`);
-} else {
-  console.log(`  No intent matched.`);
-}
-return result.fulfillmentText;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // register handle
 app.post('/register',function(req,res){
-    let errors = [];
-    const {fname,lname,email,password,confirmpassword} = req.body;
-    // console.log(req.body);
-    if(!email || !fname || !lname || !password || !confirmpassword){
-      errors.push({ msg: 'Please enter all the required fields !!' });
+  let errors = [];
+  const {fname,lname,email,password,confirmpassword} = req.body;
+  // console.log(req.body);
+  if(!email || !fname || !lname || !password || !confirmpassword){
+    errors.push({ msg: 'Please enter all the required fields !!' });
+  }
+  if (password != confirmpassword) {
+      errors.push({ msg: 'Passwords do not match' });
+  }
+  if (password.length < 6) {
+      errors.push({ msg: 'Password must be at least 6 characters' });
     }
-    if (password != confirmpassword) {
-        errors.push({ msg: 'Passwords do not match' });
-    }
-    if (password.length < 10) {
-        errors.push({ msg: 'Password must be at least 10 characters' });
-      } else if(password.length >= 10){
-          var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{10,})");
-          if(!strongRegex.test(password)){
-            errors.push({ msg: 'Password does not match the specified pattern' });  
+  
+    if (errors.length > 0) {
+      res.render('register', {
+        errors
+      });
+    } else {
+  //Check if the user exists
+  User.findOne({email:email})
+      .then(user => {
+          if(user) {
+              // User exists
+              errors.push({msg:'User already exists'});
+              res.render('register',{
+                  errors
+              });
+          } else {
+              const newUser = new User({
+                  fname,
+                  lname,
+                  email,
+                  password
+              });
+              //Hash Password
+              bcrypt.genSalt(10,(err,salt)=>bcrypt.hash(newUser.password,salt,(err,hash)=>{
+                  if(err) throw err;
+                  //set password to hash
+                  newUser.password = hash;
+                  newUser.save()
+                      .then(user => {
+                          req.flash('success','You are now registered and can login');
+                          res.redirect("/login");
+                      })
+                      .catch(err=>console.log(err));
+              }))
           }
-        }
-    
-      if (errors.length > 0) {
-        res.render('register', {
-          errors
-        });
-      } else {
-    //Check if the user exists
-    User.findOne({email:email})
-        .then(user => {
-            if(user) {
-                // User exists
-                errors.push({msg:'User already exists'});
-                res.render('register',{
-                    errors
-                });
-            } else {
-                const newUser = new User({
-                    fname,
-                    lname,
-                    email,
-                    password
-                });
-                //encrypting details
-                var id = newUser._id;
-                var key = id.toString();
-                var fcipher = crypto.createCipher('aes-256-cbc',key);
-                var lcipher = crypto.createCipher('aes-256-cbc',key);
-                var fnameCrypted = fcipher.update(fname,'utf8','hex');
-                var lnameCrypted = lcipher.update(lname,'utf8','hex');
-                fnameCrypted += fcipher.final('hex');
-                lnameCrypted += lcipher.final('hex');
-                //Hash Password
-                bcrypt.genSalt(10,(err,salt)=>bcrypt.hash(newUser.password,salt,(err,hash)=>{
-                    if(err) throw err;
-                    //set password to hash
-                    newUser.password = hash;
-                    newUser.fname = fnameCrypted;
-                    newUser.lname = lnameCrypted;
-                    fnameCrypted = null;
-                    lnameCrypted = null;
-                    newUser.save()
-                        .then(user => {
-                            req.flash('success','You are now registered and can login');
-                            res.redirect("/login");
-                        })
-                        .catch(err=>console.log(err));
-                }))
-            }
-        });
-      }
+      });
+    }
 });
+
 
  //show login form
 app.get("/login", function(req, res){
@@ -335,17 +235,7 @@ app.post("/login", function(req, res,next){
 
 //Home route
 app.get('/home',ensureAuthenticated,(req,res)=>{
-  var id = req.user._id;
-  var key = id.toString();
-  var fdcipher = crypto.createDecipher('aes-256-cbc',key);
-  var ldcipher = crypto.createDecipher('aes-256-cbc',key);
-  var fnameDcrypted = fdcipher.update(req.user.fname,'hex','utf8');
-  var lnameDcrypted = ldcipher.update(req.user.lname,'hex','utf8');
-  fnameDcrypted += fdcipher.final('utf8');
-  lnameDcrypted += ldcipher.final('utf8');     
-  name = fnameDcrypted +' '+ lnameDcrypted;
-  fnameDcrypted = null;
-  lnameDcrypted = null;
+  name = req.user.fname+' '+req.user.lname;
   res.render('home',{name:name, user: req.user});
 });
 
@@ -382,13 +272,13 @@ app.post('/forgot', function(req, res, next) {
         var smtpTransport = nodemailer.createTransport({
           service: 'Gmail', 
           auth: {
-            user: 'codewithash99@gmail.com',
-             pass: process.env.GMAILPW
+            user: 'kratitiwari5034@gmail.com',
+             pass: 'kishan@123'
           }
         });
         var mailOptions = {
           to: user.email,
-          from: 'codewithash99@gmail.com',
+          from: 'kratitiwari5034@gmail.com',
           subject: 'Redpositive Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
@@ -447,13 +337,13 @@ app.post('/reset/:token', function(req, res) {
         var smtpTransport = nodemailer.createTransport({
           service: 'Gmail', 
           auth: {
-            user: 'codewithash99@gmail.com',
-             pass: process.env.GMAILPW
+            user: 'kratitiwari5034@gmail.com',
+             pass: 'kishan@123'
           }
         });
         var mailOptions = {
           to: user.email,
-          from: 'codewithash99@mail.com',
+          from: 'kratitiwari5034@gmail.com',
           subject: 'Your password has been changed',
           text: 'Hello,\n\n' +
             'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
@@ -475,17 +365,12 @@ app.get('/logout',(req,res)=>{
     res.redirect('/login');
 });
 
-// //bot route
-// app.get('/bot',function(req,res){
-//   res.render('pop');
-// })
-
 // Configuring routes
 app.use("/meeting",meetingRoutes);
 app.use("/webinar",webinarRoutes);
 app.use("/classroom",classroomRoutes);
 app.use("/profile", profileRoutes);
 
-app.listen(5000,function(){
+server.listen(5000,function(){
     console.log("The Server is running at port 5000");
 });
