@@ -85,8 +85,8 @@ router.post("/createmeeting",ensureAuthenticated, function(req, res){
                           var smtpTransport = nodemailer.createTransport({
                             service: 'Gmail', 
                             auth: {
-                              user: 'kratitiwari5034@gmail.com',
-                               pass: 'kishan@123'
+                              user: 'codewithash99@gmail.com',
+                               pass: process.env.GMAILPW
                             }
                           });
                           var mailOptions = {
