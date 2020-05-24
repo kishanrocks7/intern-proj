@@ -1,6 +1,7 @@
 require('dotenv').config();
 var express = require("express");
 var app = express();
+const uuid = require('uuid');
 var bodyparser = require("body-parser");
 var mongoose = require("mongoose");
 var passport = require("passport");
@@ -13,6 +14,8 @@ var async = require("async");
 var nodemailer = require("nodemailer");
 var crypto = require("crypto");
 app.locals.moment = require('moment');
+const sessionId = uuid.v4();
+
 // Model
 var User = require("./models/user");
 var Meeting = require("./models/meeting");
@@ -184,6 +187,118 @@ app.post('/register',function(req,res){
       });
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// starting of server for caht-box
+
+const formatMessage = require('./utils/messages');
+const {
+  userJoin,
+  getCurrentUser,
+  userLeave,
+  getRoomUsers
+} = require('./utils/users');
+
+
+
+const botName = 'see';
+
+
+
+
+
+
+
+io.on('connection', socket => {
+  socket.on('joinRoom', ({ username, room }) => {
+    const user = userJoin(socket.id, username, room);
+
+    socket.join(user.room);
+
+    // Welcome current user
+    socket.emit('message', formatMessage(botName, 'Welcome to Red-Chat'));
+
+    // Broadcast when a user connects
+    socket.broadcast
+      .to(user.room)
+      .emit(
+        'message',
+        formatMessage(botName, `${user.username} has joined the chat`)
+      );
+
+    // Send users and room info
+    io.to(user.room).emit('roomUsers', {
+      room: user.room,
+      users: getRoomUsers(user.room)
+    });
+  });
+
+  // Listen for chatMessage
+  socket.on('chatMessage', msg => {
+    const user = getCurrentUser(socket.id);
+
+    io.to(user.room).emit('message', formatMessage(user.username, msg));
+  });
+
+  // Runs when client disconnects
+  socket.on('disconnect', () => {
+    const user = userLeave(socket.id);
+
+    if (user) {
+      io.to(user.room).emit(
+        'message',
+        formatMessage(botName, `${user.username} has left the chat`)
+      );
+
+      // Send users and room info
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
+    }
+  });
+});
+
+
+
+// end of server for chat-box
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  //show login form
