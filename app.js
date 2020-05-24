@@ -4,6 +4,7 @@ var app = express();
 var bodyparser = require("body-parser");
 var mongoose = require("mongoose");
 var passport = require("passport");
+const uuid = require('uuid');
 var LocalStrategy = require("passport-local").Strategy;
 var methodOverride = require("method-override");
 var bcrypt = require('bcryptjs');
@@ -12,6 +13,7 @@ var session = require('express-session');
 var async = require("async");
 var nodemailer = require("nodemailer");
 var crypto = require("crypto");
+const sessionId = uuid.v4();
 app.locals.moment = require('moment');
 // Model
 var User = require("./models/user");
@@ -21,6 +23,106 @@ var MeetingUser = require("./models/meetinguser");
 const server = require('http').Server(app);
 // messages will be exchanged using this 
 const io = require('socket.io')(server)
+
+
+
+
+
+
+
+//starting of chatservers
+
+
+
+
+
+const formatMessage = require('./utils/messages');
+const {
+  userJoin,
+  getCurrentUser,
+  userLeave,
+  getRoomUsers
+} = require('./utils/users');
+
+
+
+const botName = 'see';
+
+
+
+
+
+
+
+io.on('connection', socket => {
+  socket.on('joinRoom', ({ username, room }) => {
+    const user = userJoin(socket.id, username, room);
+
+    socket.join(user.room);
+
+    // Welcome current user
+    socket.emit('message', formatMessage(botName, 'Welcome to Red-Chat'));
+
+    // Broadcast when a user connects
+    socket.broadcast
+      .to(user.room)
+      .emit(
+        'message',
+        formatMessage(botName, `${user.username} has joined the chat`)
+      );
+
+    // Send users and room info
+    io.to(user.room).emit('roomUsers', {
+      room: user.room,
+      users: getRoomUsers(user.room)
+    });
+  });
+
+  // Listen for chatMessage
+  socket.on('chatMessage', msg => {
+    const user = getCurrentUser(socket.id);
+
+    io.to(user.room).emit('message', formatMessage(user.username, msg));
+  });
+
+  // Runs when client disconnects
+  socket.on('disconnect', () => {
+    const user = userLeave(socket.id);
+
+    if (user) {
+      io.to(user.room).emit(
+        'message',
+        formatMessage(botName, `${user.username} has left the chat`)
+      );
+
+      // Send users and room info
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
+    }
+  });
+});
+
+
+
+
+//end of chat servers
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Routes
