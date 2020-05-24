@@ -272,14 +272,14 @@ app.post('/forgot', function(req, res, next) {
         var smtpTransport = nodemailer.createTransport({
           service: 'Gmail', 
           auth: {
-            user: 'codewithash99@gmail.com',
-             pass: process.env.GMAILPW
+            user: 'kratitiwari5034@gmail.com',
+             pass: 'kishan@123'
           }
         });
         var mailOptions = {
           to: user.email,
-          from: 'codewithash99@gmail.com',
-          subject: 'Redpositive Password Reset',
+          from: 'kratitiwari5034@gmail.com',
+          subject: 'kishan@123',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
             'http://' + req.headers.host + '/reset/' + token + '\n\n' +
@@ -337,14 +337,14 @@ app.post('/reset/:token', function(req, res) {
         var smtpTransport = nodemailer.createTransport({
           service: 'Gmail', 
           auth: {
-            user: 'codewithash99@gmail.com',
+            user: '',
              pass: process.env.GMAILPW
           }
         });
         var mailOptions = {
           to: user.email,
-          from: 'codewithash99@mail.com',
-          subject: 'Your password has been changed',
+          from: 'kratitiwari5034@mail.com',
+          subject: 'forgot password',
           text: 'Hello,\n\n' +
             'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
         };
