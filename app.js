@@ -1,7 +1,9 @@
+const dialogflow = require('dialogflow');
 require('dotenv').config();
 var express = require("express");
 var app = express();
 const uuid = require('uuid');
+
 var bodyparser = require("body-parser");
 var mongoose = require("mongoose");
 var passport = require("passport");
@@ -16,6 +18,13 @@ var crypto = require("crypto");
 app.locals.moment = require('moment');
 const sessionId = uuid.v4();
 
+
+
+
+
+
+
+
 // Model
 var User = require("./models/user");
 var Meeting = require("./models/meeting");
@@ -24,6 +33,7 @@ var MeetingUser = require("./models/meetinguser");
 const server = require('http').Server(app);
 // messages will be exchanged using this 
 const io = require('socket.io')(server)
+
 
 
 // Routes
@@ -37,6 +47,17 @@ mongoose.connect("//mongodb://localhost:27017/v1", {useNewUrlParser:true,useUnif
     .then(()=>console.log('MongoDB Connected....'))
     .catch(err => console.log(err));
 app.use(bodyparser.urlencoded({extended: true}));
+
+app.use(function (req, res, next) {
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  // Pass to next layer of middleware
+  next();
+});
 //Express session
 
 app.set("view engine","ejs");
@@ -115,6 +136,178 @@ io.on('connection', socket => {
 // ========================================================================
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+//chat server starts
+
+
+
+const formatMessage = require('./utils/messages');
+const {
+  userJoin,
+  getCurrentUser,
+  userLeave,
+  getRoomUsers
+} = require('./utils/users');
+
+
+
+const botName = 'see';
+
+
+
+
+
+
+
+io.on('connection', socket => {
+  socket.on('joinRoom', ({ username, room }) => {
+    const user = userJoin(socket.id, username, room);
+
+    socket.join(user.room);
+
+    // Welcome current user
+    socket.emit('message', formatMessage(botName, 'Welcome to Red-Chat'));
+
+    // Broadcast when a user connects
+    socket.broadcast
+      .to(user.room)
+      .emit(
+        'message',
+        formatMessage(botName, `${user.username} has joined the chat`)
+      );
+
+    // Send users and room info
+    io.to(user.room).emit('roomUsers', {
+      room: user.room,
+      users: getRoomUsers(user.room)
+    });
+  });
+
+  // Listen for chatMessage
+  socket.on('chatMessage', msg => {
+    const user = getCurrentUser(socket.id);
+
+    io.to(user.room).emit('message', formatMessage(user.username, msg));
+  });
+
+  // Runs when client disconnects
+  socket.on('disconnect', () => {
+    const user = userLeave(socket.id);
+
+    if (user) {
+      io.to(user.room).emit(
+        'message',
+        formatMessage(botName, `${user.username} has left the chat`)
+      );
+
+      // Send users and room info
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
+    }
+  });
+});
+
+
+// chat server ends here
+
+
+
+
+//bot server starts here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.post('/send-msg',(req,res)=>{
+  runSample(req.body.MSG).then(data=>{
+      res.send({Reply:data})
+  })
+})
+
+/**
+* Send a query to the dialogflow agent, and return the query result.
+* @param {string} projectId The project to be used
+*/
+async function runSample(msg,projectId = 'rn-bot-mucfbt') {
+// A unique identifier for the given session
+
+
+
+// Create a new session
+const sessionClient = new dialogflow.SessionsClient({
+    keyFilename:"C:/Users/kishan/Desktop/kishan-github-intern-proj/RN-bot-a4afe1559c55.json"
+});
+const sessionPath = sessionClient.sessionPath(projectId, sessionId);
+
+// The text query request.
+const request = {
+  session: sessionPath,
+  queryInput: {
+    text: {
+      // The query to send to the dialogflow agent
+      text: msg,
+      // The language used by the client (en-US)
+      languageCode: 'en-US',
+    },
+  },
+};
+
+// Send request and log result
+const responses = await sessionClient.detectIntent(request);
+console.log('Detected intent');
+const result = responses[0].queryResult;
+console.log(`  Query: ${result.queryText}`);
+console.log(`  Response: ${result.fulfillmentText}`);
+if (result.intent) {
+  console.log(`  Intent: ${result.intent.displayName}`);
+} else {
+  console.log(`  No intent matched.`);
+}
+return result.fulfillmentText;
+}
+
+
+
+
+//bot server ends here
+
+
+
+
+
+
+
+
+
+
+
+
 //root route
 app.get("/", function(req, res){
     res.render("landing");
@@ -187,118 +380,6 @@ app.post('/register',function(req,res){
       });
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// starting of server for caht-box
-
-const formatMessage = require('./utils/messages');
-const {
-  userJoin,
-  getCurrentUser,
-  userLeave,
-  getRoomUsers
-} = require('./utils/users');
-
-
-
-const botName = 'see';
-
-
-
-
-
-
-
-io.on('connection', socket => {
-  socket.on('joinRoom', ({ username, room }) => {
-    const user = userJoin(socket.id, username, room);
-
-    socket.join(user.room);
-
-    // Welcome current user
-    socket.emit('message', formatMessage(botName, 'Welcome to Red-Chat'));
-
-    // Broadcast when a user connects
-    socket.broadcast
-      .to(user.room)
-      .emit(
-        'message',
-        formatMessage(botName, `${user.username} has joined the chat`)
-      );
-
-    // Send users and room info
-    io.to(user.room).emit('roomUsers', {
-      room: user.room,
-      users: getRoomUsers(user.room)
-    });
-  });
-
-  // Listen for chatMessage
-  socket.on('chatMessage', msg => {
-    const user = getCurrentUser(socket.id);
-
-    io.to(user.room).emit('message', formatMessage(user.username, msg));
-  });
-
-  // Runs when client disconnects
-  socket.on('disconnect', () => {
-    const user = userLeave(socket.id);
-
-    if (user) {
-      io.to(user.room).emit(
-        'message',
-        formatMessage(botName, `${user.username} has left the chat`)
-      );
-
-      // Send users and room info
-      io.to(user.room).emit('roomUsers', {
-        room: user.room,
-        users: getRoomUsers(user.room)
-      });
-    }
-  });
-});
-
-
-
-// end of server for chat-box
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
  //show login form
@@ -387,13 +468,13 @@ app.post('/forgot', function(req, res, next) {
         var smtpTransport = nodemailer.createTransport({
           service: 'Gmail', 
           auth: {
-            user: 'codewithash99@gmail.com',
-             pass: process.env.GMAILPW
+            user: 'kratitiwari5034@gmail.com',
+             pass: 'kishan@123'
           }
         });
         var mailOptions = {
           to: user.email,
-          from: 'codewithash99@gmail.com',
+          from: 'kratitiwari5034@gmail.com',
           subject: 'Redpositive Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
@@ -458,7 +539,7 @@ app.post('/reset/:token', function(req, res) {
         });
         var mailOptions = {
           to: user.email,
-          from: 'codewithash99@mail.com',
+          from: 'kratitiwari5034@gmail.com',
           subject: 'Your password has been changed',
           text: 'Hello,\n\n' +
             'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'

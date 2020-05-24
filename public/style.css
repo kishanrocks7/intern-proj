@@ -29,6 +29,9 @@ body{
 
 
 
+
+
+
 .landing{
     position: relative;
     height: 100vh;
@@ -101,29 +104,29 @@ body{
 .formpage{
     height: 100vh;
     padding-top: 5vh;
-    background: white;
+    background: #900C0C;
 }
 
 .loginformpage{
     height: 100vh;
     padding-top: 10vh;
-    background: white;
+    background: #900C0C;
 }
 
 .homepage{
     min-height: 100vh;
-    background: white;
+    background: #900C0C;
 }
 
 nav{
     margin-bottom: 10vh;
     box-shadow: 0 5px 10px -4px black;
-    background-color: #d10b0b;
+    background-color: white;
 }
 
 .navbar-brand{
     font-size: 30px;
-    color: white !important;
+    color: red !important;
     font-weight: bold;
 } 
 
@@ -135,29 +138,19 @@ nav{
 .nav-link{
     font-size: 23px;
     transition-duration: 0.4s;
-    color: white !important;
+    color: black;
     border-radius: 15px;
     margin: 0 1px;
 }
 
 .nav-link:hover{
-    background-color: white;
+    background-color: #fd5050;
     border-radius: 15px;
-    color: #d10b0b !important;
+    color: white !important;
 }
 
 .formbox{
     width: 50%;
-    font-family: 'Montserrat', sans-serif;
-    margin: 0 auto;
-    padding: 20px 30px 10px 30px;
-    border-radius: 2px;
-    box-shadow: 0 2px 10px 1px #000000;
-    background: white;
-}
-
-.imgformbox{
-    width: 80%;
     font-family: 'Montserrat', sans-serif;
     margin: 0 auto;
     padding: 20px 30px 10px 30px;
@@ -215,11 +208,11 @@ nav{
     background-color: #cc4928;
 }
 
-/* .belowcreateform{
+.belowcreateform{
     margin-top: 2vh;
     display: none;
     transition-duration: 0.3s;
-} */
+}
 
 .back{
     margin-bottom: 15px;
@@ -244,7 +237,7 @@ nav{
 .smaller{
     font-size: 22px;
     font-family: 'Montserrat', sans-serif;
-    color: whitesmoke !important;
+    color: black !important;
     margin-left: 1vw;
     font-weight: normal;
 }
@@ -259,7 +252,7 @@ nav{
 }
 
 .meetingcolumn:hover{
-    background-color: #ff1b1b;
+    background-color: #c22f0a;
     text-decoration: none;
     transform: translateY(-2%);
     box-shadow: 0 5px 10px -2px black;
@@ -267,11 +260,10 @@ nav{
 
 
 .meetingcolumn h4, h5{
-    color: #690909;
+    color: white;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
 }
-
 
 .webinarcolumn{
     padding: 4vh;
@@ -282,24 +274,14 @@ nav{
 }
 
 .webinarcolumn:hover{
-    background-color: #ff1b1b;
+    background-color: #c22f0a;
     text-decoration: none;
     transform: translateY(-1%);
     box-shadow: 0 3px 10px -2px black;
 }
 
-.webinarcolumn h4{
-    color: #690909;
-    font-family: 'Montserrat', sans-serif;
-}
-
-.webinarcolumn h1{
-    color: #690909;
-    font-family: 'Montserrat', sans-serif;
-}
-
-.webinarcolumn h5{
-    color: #690909;
+.webinarcolumn h4, h5{
+    color: white;
     font-family: 'Montserrat', sans-serif;
 }
 
@@ -309,10 +291,6 @@ hr.styledhr{
 
 .meetingimgholder{
     margin: 3vh 0;
-}
-
-.profileimgholder{
-    margin-bottom: 3vh;
 }
 
 
@@ -339,18 +317,18 @@ hr.styledhr{
 }
 
 .button-submit{
-    background: #d10b0b;
+    background: #418f02;
     color: white;
 }
 
 .button-login{
-    background: #d10b0b;
+    background: #5ca805;
     color: white;
 }
 
 .button-warning{
-    color: white;
-    background: #d10b0b;
+    color: black;
+    background: #ffef12;
 }
 
 .top{
@@ -358,7 +336,7 @@ hr.styledhr{
 }
 
 .form-control{
-    border: 1px solid black;
+    box-shadow: 0 0 5px -1px #ff9f9f;
 }
 
 .form-group label{
@@ -371,15 +349,7 @@ hr.styledhr{
 }
 
 .formheading h1{
-    color: #d10b0b;
-}
-
-.homeheading{
-    padding-bottom: 1vh;
-}
-
-.homeheading h1{
-    color: #690909;
+    color: white;
 }
 
 .star{
@@ -393,7 +363,6 @@ hr.styledhr{
 .red:hover{
     text-decoration: none;
     color: red;
-    opacity: 0.7;
     font-weight: bold;
 }
 
@@ -499,18 +468,19 @@ hr.styledhr{
 }
 
 
-.out{
-    position: fixed;
-    bottom: 20%;
-    left: 55%;
-    font-size: 50px;
-    border: none;
-    color: black;
-    cursor: pointer;
-    z-index: 0;
+.mainvideo{
+    padding: 15px;
+    position: relative;
 }
 
-
+.out{
+    position: absolute;
+    top: 5px;
+    right: 20px;
+    font-size: 25px;
+    border: none;
+    color: black;
+}
 
 .out:hover{
     color: black;
@@ -518,14 +488,12 @@ hr.styledhr{
 }
 
 .share{
-    position: fixed;
-    bottom: 20%;
-    right: 30%;
-    font-size: 50px;
+    position: absolute;
+    top: 40px;
+    right: 15px;
+    font-size: 25px;
     border: none;
-    color: black;
     background-color: white;
-    z-index: 0;
 }
 
 .share:hover{
@@ -584,14 +552,12 @@ hr.styledhr{
 
 .mainvideowebinar video{
     height: auto;
-    width: 60%;
+    width: 90%;
 }
 
 
 .video-row{
-    margin-top: 10vh;
-    column-count: 2;
-    display: none;
+    column-count: 4;
 }
 
 .video-row-exam{
@@ -599,24 +565,12 @@ hr.styledhr{
 }
 
 .video-column{
-    width: 100%;
-    text-align: center;
-    position: relative;
+    width: 25%;
 }
 
 .video-column video{
-    height: 90%;
-    width: 90%;
-}
-
-.video-text{
-    position: absolute;
-    width: 100%;
-    bottom: 7.5px;
-}
-
-.video-text h5{
-    color: white;
+    height: 160px;
+    width: 160px;
 }
 
 .bars{
@@ -627,10 +581,6 @@ hr.styledhr{
     background-color: #fdf5eb;
 }
 
-#consultingRoom{
-    display: none;
-}
-
 .quesline{
     margin-top: 10px;
 }
@@ -638,14 +588,6 @@ hr.styledhr{
 .ques{
     font-size: 25px;
     font-weight: bold;
-}
-
-.profilepic{
-    height: 250px;
-    width: 250px;
-    border-radius: 50%;
-    box-shadow: 0 5px 10px -3px black;
-    border: 2px solid white;
 }
 
 
@@ -688,11 +630,6 @@ hr.styledhr{
     .landingoptions li a{
         color: black;
     }
-
-    .webinarcolumn, .meetingcolumn{
-        box-shadow: none;
-        margin-bottom: 1vh;
-    }
 }
 
 
@@ -708,10 +645,6 @@ hr.styledhr{
     }
 
     .formbox{
-        width: 95%;
-    }
-
-    .imgformbox{
         width: 95%;
     }
 
@@ -739,7 +672,7 @@ hr.styledhr{
     }
 
     .video-column{
-        width: 100%;
+        width: 50%;
     }
 
     .mainvideo{
@@ -748,23 +681,8 @@ hr.styledhr{
 
     .mainvideo video{
         height: auto;
-        width: 80%;
+        width: 70%;
     }
-
-    .out{
-        bottom: 20%;
-        left: 30%;
-        z-index: 0;
-    }
-    
-    
-    .share{
-        bottom: 20%;
-        right: 30%;
-        background-color: white;
-        z-index: 0;
-    }
-
 
     .chat{
         height: 0;
@@ -788,7 +706,6 @@ hr.styledhr{
         top: 15px;
         right: 20px;
         font-size: 25px;
-        cursor: pointer;
     }
 
     .moreheight{
