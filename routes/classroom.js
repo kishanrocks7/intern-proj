@@ -79,13 +79,13 @@ router.post("/createclassroom",ensureAuthenticated, function(req, res){
                           var smtpTransport = nodemailer.createTransport({
                             service: 'Gmail', 
                             auth: {
-                              user: 'codewithash99@gmail.com',
-                               pass: process.env.GMAILPW
+                              user: 'kratitiwari5034@gmail.com',
+                               pass: 'kishan@123'
                             }
                           });
                           var mailOptions = {
                             to: req.user.email,
-                            from: 'codewithash99@gmail.com',
+                            from: 'kratitiwari5034@gmail',
                             subject: 'Redpositive classroom Details',
                             text: 'You are receiving this because you have requested to host a classroom.\n\n' +
                                   'Please share the following details to those whom you want to invite to your classroom.\n\n' +
