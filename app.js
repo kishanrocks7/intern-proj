@@ -469,7 +469,7 @@ app.post('/forgot', function(req, res, next) {
           service: 'Gmail', 
           auth: {
             user: 'kratitiwari5034@gmail.com',
-             pass: 'kishan@123'
+             pass: 'krishiv@123'
           }
         });
         var mailOptions = {
@@ -534,7 +534,7 @@ app.post('/reset/:token', function(req, res) {
           service: 'Gmail', 
           auth: {
             user: 'kratitiwari5034@gmail.com',
-             pass: 'kishan@123'
+             pass: 'krishiv@123'
           }
         });
         var mailOptions = {

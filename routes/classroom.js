@@ -80,7 +80,7 @@ router.post("/createclassroom",ensureAuthenticated, function(req, res){
                             service: 'Gmail', 
                             auth: {
                               user: 'kratitiwari5034@gmail.com',
-                               pass: 'kishan@123'
+                               pass: 'krishiv@123'
                             }
                           });
                           var mailOptions = {
