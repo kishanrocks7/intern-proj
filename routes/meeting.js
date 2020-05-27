@@ -85,13 +85,13 @@ router.post("/createmeeting",ensureAuthenticated, function(req, res){
                           var smtpTransport = nodemailer.createTransport({
                             service: 'Gmail', 
                             auth: {
-                              user: 'kratitiwari5034@gmail.com',
-                               pass: 'kishan@123'
+                              user: process.env.GMAILACC,
+                               pass: process.env.GMAILPW
                             }
                           });
                           var mailOptions = {
                             to: req.user.email,
-                            from: 'kratitiwari5034@gmail.com',
+                            from: process.env.GMAILACC,
                             subject: 'Redpositive Meeting Details',
                             text: 'You are receiving this because you have requested to host a meeting.\n\n' +
                                   'Please share the following details to those whom you want to invite to your meeting.\n\n' +

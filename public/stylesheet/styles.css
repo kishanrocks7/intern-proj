@@ -533,6 +533,22 @@ hr.styledhr{
     opacity: 0.6;
 }
 
+.mode{
+    position: fixed;
+    bottom: 20%;
+    right: 37%;
+    font-size: 50px;
+    border: none;
+    color: black;
+    background-color: white;
+    z-index: 0;
+}
+
+.mode:hover{
+    color: black;
+    opacity: 0.6;
+}
+
 .upload{
     position: absolute;
     top: 75px;
@@ -548,19 +564,6 @@ hr.styledhr{
 }
 
 
-.mode{
-    position: absolute;
-    top: 115px;
-    right: 20px;
-    font-size: 25px;
-    border: none;
-    color: black;
-}
-
-.mode:hover{
-    color: black;
-    opacity: 0.6;
-}
 
 
 .modeexam{
@@ -711,7 +714,7 @@ hr.styledhr{
         width: 95%;
     }
 
-    .imgformbox{
+    .rmbox{
         width: 95%;
     }
 

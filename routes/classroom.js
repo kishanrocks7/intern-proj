@@ -7,6 +7,8 @@ var shortid = require('shortid');
 shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
 var nodemailer = require("nodemailer");
 var crypto = require("crypto");
+var multer = require("multer");
+var path = require("path");
 router.use(flash());
 //Global vars for flash
 router.use((req,res,next)=>{
@@ -23,10 +25,88 @@ router.use((req,res,next)=>{
 //ensure Authentication
 var {ensureAuthenticated} = require('../middleware/auth');
 
+
+// Assignment picture upload
+
+// Set Storage Engine
+const storage = multer.diskStorage({
+    destination: './public/assignment/',
+    filename: function(req, file, cb){
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Initialize Upload 
+const upload = multer({
+    storage: storage,
+    limits: {fileSize : 100000000000000}, //(in bytes)
+    fileFilter: function(req, file, cb){
+        checkFileType(file, cb);
+    }
+}).single('uploadImage');
+
+
+// Check file type
+function checkFileType(file, cb){
+    // Allowed extensions
+    const filetypes = /jpeg|jpg|png|gif/;
+    // Check extension
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
+    const mimetype = filetypes.test(file.mimetype);
+
+    if(mimetype && extname){
+        return cb(null, true);
+    } else {
+        cb('Error: Images Only!');
+    }
+}
+
+
+
+
+// Solution upload
+
+// Set Storage Engine
+const solutionStorage = multer.diskStorage({
+    destination: './public/solution/',
+    filename: function(req, file, cb){
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Initialize Upload 
+const solutionUpload = multer({
+    storage: solutionStorage,
+    limits: {fileSize : 100000000000}, //(in bytes)
+    fileFilter: function(req, file, cb){
+        checkSolutionFileType(file, cb);
+    }
+}).single('uploadFile');
+
+
+// Check file type
+function checkSolutionFileType(file, cb){
+    // Allowed extensions
+    const filetypes = /doc|docx|pdf/;
+    // Check extension
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
+    const mimetype = filetypes.test(file.mimetype);
+
+    if(mimetype && extname){
+        return cb(null, true);
+    } else {
+        cb('Error: Doc / PDF Only!');
+    }
+}
+
+
 // Adding database models
 var User = require("../models/user");
 var classroom = require("../models/classroom");
 var ClassroomUser = require("../models/classroomuser");
+var Assignment = require("../models/assignment");
 // classroom Form Home Page
 router.get("/",ensureAuthenticated, function(req, res){
    name = req.user.fname+' '+req.user.lname;
@@ -79,13 +159,13 @@ router.post("/createclassroom",ensureAuthenticated, function(req, res){
                           var smtpTransport = nodemailer.createTransport({
                             service: 'Gmail', 
                             auth: {
-                              user: 'kratitiwari5034@gmail.com',
-                               pass: 'krishiv@123'
+                              user: process.env.GMAILACC,
+                               pass: process.env.GMAILPW
                             }
                           });
                           var mailOptions = {
                             to: req.user.email,
-                            from: 'kratitiwari5034@gmail',
+                            from: process.env.GMAILACC,
                             subject: 'Redpositive classroom Details',
                             text: 'You are receiving this because you have requested to host a classroom.\n\n' +
                                   'Please share the following details to those whom you want to invite to your classroom.\n\n' +
@@ -151,9 +231,88 @@ router.post("/joinclassroom",ensureAuthenticated, function(req, res){
 router.get("/joinclassroom/:id",ensureAuthenticated, (req, res) => {
     res.render('classroom/classroomroom', {user: req.user});
 })
+// ASSIGNMENT PICTURE ROUTE
 
+router.post('/uploadassignment', ensureAuthenticated, (req, res) => {
+    upload(req, res, (err) => {
+        if(err) {
+            console.log('Failed to upload!');
+            res.render('classroom/examroom', { msg: err, user: req.user,isAdmin:true});
+        } else {
+            if(req.file == undefined){
+                res.render('classroom/examroom', { msg: 'No image selected!', user: req.user ,isAdmin:true});
+            } else {
+                var classroom = ClassroomUser.findOne({userId: req.user._id});
+                var newAssignment = new Assignment({
+                    class : classroom.classroomId,
+                    assignment: req.file.filename
+                });
+ 
+                newAssignment.save()
+                    .then(saved => {
+                        if(saved) {
+                            var isAdmin = false;
+                            ClassroomUser.findOne({userId : req.user._id}).then(classroomUser =>{
+                              if(classroomUser){
+                                isAdmin = classroomUser.isAdmin;
+                                res.render('classroom/examroom', { 'success_msg': 'Assignment uploaded!', user: req.user,isAdmin :isAdmin, file: `assignment/${req.file.filename}`});
+                              }
+                           });
+                            
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.render('classroom/examroom', { 'error_msg': 'Upload failed!', user: req.user ,isAdmin: true });
+                    });
+            }
+        }
+    });
+ });
 
+ 
+// ASSIGNMENT SOLUTION ROUTE
 
+router.post('/uploadsolution', ensureAuthenticated, (req, res) => {
+    solutionUpload(req, res, (err) => {
+        if(err) {
+            console.log('Failed to upload!');
+            res.render('classroom/examroom', { msg: err, user: req.user,isAdmin:false });
+        } else {
+            if(req.file == undefined){
+                res.render('classroom/examroom', { msg: 'No document selected!', user: req.user,isAdmin:false });
+            } else {
+                var classroom = ClassroomUser.findOne({userId: req.user._id});
+                var solution = {
+                  solutionId: req.user._id,
+                  fileName: req.file.filename
+                }
+                Assignment.findOneAndUpdate({class: classroom.classroomId}, { solution: solution })
+                    .then(assignment => {
+                        if(assignment) {
+                            res.render('classroom/examroom', { 'success_msg': 'Solution uploaded!', user: req.user, isAdmin: false,file: `solution/${req.file.filename}`});
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.render('classroom/examroom', { 'error_msg': 'Upload failed!', user: req.user, isAdmin:false });
+                    });
+            }
+        }
+    });
+ });
+
+router.get("/exam",ensureAuthenticated, function(req, res){
+   name = req.user.fname+' '+req.user.lname;
+   var isAdmin = false; 
+     ClassroomUser.findOne({userId : req.user._id}).then(classroomUser =>{
+      if(classroomUser){
+        isAdmin = classroomUser.isAdmin;
+        res.render("classroom/examroom", {name:name, user: req.user,isAdmin:isAdmin});
+      }
+   });
+   
+});
 
 
 

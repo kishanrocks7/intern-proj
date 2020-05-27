@@ -261,7 +261,7 @@ async function runSample(msg,projectId = 'rn-bot-mucfbt') {
 
 // Create a new session
 const sessionClient = new dialogflow.SessionsClient({
-    keyFilename:"C:/Users/kishan/Desktop/kishan-github-intern-proj/RN-bot-a4afe1559c55.json"
+    keyFilename:"RN-bot-a4afe1559c55.json"
 });
 const sessionPath = sessionClient.sessionPath(projectId, sessionId);
 
@@ -468,13 +468,13 @@ app.post('/forgot', function(req, res, next) {
         var smtpTransport = nodemailer.createTransport({
           service: 'Gmail', 
           auth: {
-            user: 'kratitiwari5034@gmail.com',
-             pass: 'krishiv@123'
+            user: process.env.GMAILACC,
+             pass: process.env.GMAILPW
           }
         });
         var mailOptions = {
           to: user.email,
-          from: 'kratitiwari5034@gmail.com',
+          from: process.env.GMAILACC,
           subject: 'Redpositive Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
@@ -533,13 +533,13 @@ app.post('/reset/:token', function(req, res) {
         var smtpTransport = nodemailer.createTransport({
           service: 'Gmail', 
           auth: {
-            user: 'kratitiwari5034@gmail.com',
-             pass: 'krishiv@123'
+            user: process.env.GMAILACC,
+             pass: process.env.GMAILPW
           }
         });
         var mailOptions = {
           to: user.email,
-          from: 'kratitiwari5034@gmail.com',
+          from: process.env.GMAILACC,
           subject: 'Your password has been changed',
           text: 'Hello,\n\n' +
             'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'

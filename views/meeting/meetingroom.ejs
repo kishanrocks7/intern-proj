@@ -16,8 +16,8 @@
             <div id="videoarea" class="col-lg-9 col-md-12 order-lg-2 videoarea">
                 <div class="joinmeetingformbox" id="selectRoom" style="margin-top:40vh;">
                     <div class="form-group">
-                        <label for="classroomPurpose">Classroom Name</label>
-                        <input class="form-control" type="text" id="roomNumber" name="classroomPurpose" placeholder="Enter classroom name.." required autocomplete="off">
+                        <label for="classroomID">Classroom ID</label>
+                        <input class="form-control" type="text" id="roomNumber" name="classroomID" placeholder="Enter classroom ID.." required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <button class="button button-warning btn-block" id="goRoom">Start Camera</button>
@@ -25,6 +25,7 @@
                 </div>
                 <div id="consultingRoom" class="video-row">
                     <a title="Leave Classroom" class="out" href="/home"><i class="fa fa-close"></i></a>
+                    <a title="Exam Mode" class="mode" href="/classroom/exam"><i class="fa fa-book"></i></a>
                     <button class="share"><i class="fa fa-share-alt-square"></i></button>
                     <div class="video-column">
                         <video id="localVideo" autoplay></video>
@@ -46,7 +47,7 @@
             </div>
         </div>
     </div>
-    <iframe src="http://localhost:5000/classroom.html?username=kishan&room=123127" width="100%" height="100%" style="border:none;">
+    <iframe src="http://localhost:5000/classroom.html?username=user &room=123127" width="100%" height="100%" style="border:none;">
     </iframe>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="../../js/dynamic.js"></script>
